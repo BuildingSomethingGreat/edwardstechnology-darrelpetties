@@ -1,2 +1,9 @@
+# https://darrel-petties.netlify.app/
 User-agent: *
 Allow: /
+
+# Crawl the page itself, not the bundled binaries.
+Disallow: /assets/icon-
+Allow: /assets/og-image.jpg
+
+Sitemap: https://darrel-petties.netlify.app/sitemap.xml

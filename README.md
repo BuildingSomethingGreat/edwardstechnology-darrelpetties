@@ -9,7 +9,26 @@ Managed by Edwards Technology.
 | --- | --- |
 | `index.html` | The entire site — a self-unpacking bundle. Images, fonts, the logo, and the component runtime ship inline as base64 in a `__bundler/manifest` script tag; a loader script decodes them to blob URLs and renders the page. |
 | `netlify.toml` | Publishes the repo root as-is. No build step. |
-| `robots.txt` | Allow-all. |
+| `robots.txt` | Allow-all, points at the sitemap. |
+| `sitemap.xml` | The single URL, with its image. |
+| `site.webmanifest` | PWA manifest — name, theme `#100E0B`, background `#050403`, icon set. |
+| `favicon.svg` / `favicon.ico` / `apple-touch-icon.png` | DP monogram, cream-to-gold gradient on the site's near-black. |
+| `assets/icon-*.png` | 192/512 plus a maskable 512 (full-bleed, mark inside the safe zone) for the manifest. |
+| `assets/og-image.jpg` | 1200x630 social card, cropped from the hero screenshot. |
+
+## SEO
+
+Metadata lives in **two** places and both must be kept in sync:
+
+1. The outer `<head>` of `index.html` — this is the raw HTML, and it is all that social
+   scrapers (Facebook, iMessage, Slack, LinkedIn) ever read, since they do not run JS.
+2. The `<helmet>` block inside the `__bundler/template` JSON string — the bundler replaces
+   `document.documentElement` wholesale on swap, so this copy is what a JS-rendering crawler
+   (Googlebot) sees. Editing only the outer head silently loses the tags after ~140ms.
+
+Covered: title, description, canonical, robots (`max-image-preview:large`), theme-color,
+Open Graph with explicit image dimensions, Twitter `summary_large_image`, and a JSON-LD
+`@graph` of Person (awards, sameAs socials) + Church (The High Place) + WebSite.
 
 Sections: loader → hero (`video-reveal`) → achievements → horizontal photo gallery → footer/contact.
 Music button plays the "Word" single through a hidden YouTube IFrame player.
