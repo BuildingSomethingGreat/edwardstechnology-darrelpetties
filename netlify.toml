@@ -30,6 +30,14 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# /assets/* is immutable above, but this one is hand-edited code with a stable
+# filename — it must not be frozen in caches for a year. Listed after the
+# wildcard so it overrides it.
+[[headers]]
+  for = "/assets/fireworks.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
 [[headers]]
   for = "/*.png"
   [headers.values]
