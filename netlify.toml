@@ -1,0 +1,14 @@
+# Netlify config — Darrel Petties landing page (single-page static bundle).
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
