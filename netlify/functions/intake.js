@@ -65,8 +65,14 @@ exports.handler = async (event) => {
   try { data = JSON.parse(event.body || '{}'); }
   catch { return reply(400, { ok: false, error: 'Malformed request' }); }
 
-  // Bots fill every field they can see; the form ships one nobody can.
-  if (clean(data.company, 200)) return reply(200, { ok: true, id: null });
+  // The form ships a hidden trap field. A filled trap used to mean "drop it
+  // silently", but browser autofill and password managers fill hidden inputs
+  // too — a human whose manager typed into it lost their inquiry and still saw
+  // a success screen. Now the row is written and flagged for review instead, so
+  // a false positive costs a checkbox rather than a lead. `company` is the old
+  // trap name, still honoured for pages served from cache.
+  const trapped = Boolean(clean(data.hp, 200) || clean(data.company, 200));
+  if (trapped) console.warn('Intake trap field filled — saving flagged.');
 
   const email = clean(data.email, 200).toLowerCase();
   if (!EMAIL_RE.test(email)) return reply(400, { ok: false, error: 'Please enter a valid email address.' });
@@ -86,7 +92,10 @@ exports.handler = async (event) => {
       const res = await airtable(`${baseId}/${table}`, token, {
         method: 'POST',
         body: JSON.stringify({
-          fields: { Name: email, Email: email, Source: source, Stage: 'Email only', Status: 'New' },
+          fields: {
+            Name: email, Email: email, Source: source,
+            Stage: 'Email only', Status: 'New', Flagged: trapped,
+          },
         }),
       });
       if (!res.ok) {
@@ -112,6 +121,7 @@ exports.handler = async (event) => {
     Source: source,
     Stage: 'Completed',
     Status: 'New',
+    Flagged: trapped,
   };
   if (bookingType) fields['Booking Type'] = bookingType;
   if (eventDate) fields['Event Date'] = eventDate;
