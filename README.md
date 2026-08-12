@@ -16,6 +16,30 @@ Managed by Edwards Technology.
 | `assets/icon-*.png` | 192/512 plus a maskable 512 (full-bleed, mark inside the safe zone) for the manifest. |
 | `assets/og-image.jpg` | 1200x630 social card, cropped from the hero screenshot. |
 
+## Ministry intake form
+
+The footer asks for an email and nothing else. On submit it posts
+`{step:"email"}` to `/.netlify/functions/intake`, which writes the row to Airtable
+immediately with Stage "Email only" — so someone who abandons the second step is
+still a lead the office can chase. Then a sheet opens (bottom sheet under 861px,
+right-hand drawer above it) prefilled with that email for name, booking type,
+date, organization, phone and message; submitting posts `{step:"details"}` with
+the record id returned by step 1.
+
+The id alone cannot overwrite a row: the function re-reads the record and patches
+only if its Email matches the submitted address. A missing or mismatched id falls
+back to creating a fresh row, so details are never dropped.
+
+- Data: Airtable base `appnwq20GTzMqYBN4` (Client-DarrelPetties), table `Bookings`
+- Secret: `AIRTABLE_TOKEN` in Netlify env — a PAT with `data.records:read` +
+  `data.records:write` on that base. **Without it the form returns a friendly
+  error and points at the ministry email.**
+- The sheet is built imperatively in `_buildSheet()` rather than in the template,
+  because the DC renderer drops boolean attributes (see the loader-video note in
+  the git history) and mangles controlled inputs.
+- A hidden `company` field is a honeypot: if it arrives filled, the function
+  returns 200 and writes nothing.
+
 ## SEO
 
 Metadata lives in **two** places and both must be kept in sync:
